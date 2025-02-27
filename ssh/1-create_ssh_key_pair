@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
-# Create the RSA key pair with 4096 bits and passphrase 'betty'
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/school -N "betty"
+
+# Ensure .ssh directory exists
+mkdir -p ~/.ssh
+
+# Overwrite the existing key without prompt
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/school -N "betty" -y
+echo "SSH key pair created successfully."
