@@ -1,3 +1,2 @@
 #!/bin/bash
-
-ssh -i ~/.ssh/school ubuntu@196.12.151.106
+ssh -i ~/.ssh/school -o StrictHostKeyChecking=no ubuntu@127.0.0.1
