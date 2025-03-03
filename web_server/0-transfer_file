@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# Checks if less than 4 arguments are provided; if true, prints usage instructions, otherwise uses `scp` to transfer a file to a remote server.
 if [ $# -lt 4 ]
 then
     echo "Usage: 0-transfer_file PATH_TO_FILE IP USERNAME PATH_TO_SSH_KEY"
