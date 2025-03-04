@@ -1,21 +1,10 @@
 #!/usr/bin/env bash
-# Bash script to install nginx web server & make the following configurations:
+# SetUp Process for Nginx on a server
 
-# Update and install nginx
-apt-get update
-apt-get install -y nginx
-
-# Create the directory and file for the HTML page
-mkdir -p /etc/nginx/html
-echo "Holberton School" > /etc/nginx/html/index.html
-
-# Configure nginx to serve the page on port 80
-echo "server {
-     listen      80 default_server;
-     listen      [::]:80 default_server;
-     root        /etc/nginx/html;
-     index       index.html index.htm;
-}" > /etc/nginx/sites-available/default
-
-# Restart nginx without using systemctl
+apt-get -y update
+apt-get -y install nginx
+ufw enable
+ufw allow 'Nginx HTTP'
+ufw allow 'OpenSSH'
+echo "Holberton School" > /var/www/html/index.html
 service nginx restart
