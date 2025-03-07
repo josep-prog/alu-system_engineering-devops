@@ -14,8 +14,8 @@ echo '
                 default_backend web_servers
         backend web_servers
                 balance roundrobin
-                server 5408-web-01 3.91.216.134:80 check
-                server 5408-web-02 54.152.17.53:80 check
+                server 6410-web-01 54.89.196.80 check
+                server 5408-web-02 54.196.136.88 check
 ' >> /etc/haproxy/haproxy.cfg
 
 # Restart HAproxy service
