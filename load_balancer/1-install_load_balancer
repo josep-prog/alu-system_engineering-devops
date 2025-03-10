@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
-
 # Install and configure HAProxy load balancer
 
+# Function to check if a command is installed and install it if not
 function install() {
     local package=$1
     if ! command -v "$package" &> /dev/null; then
         echo -e "	Installing: $package\n"
-        if ! sudo apt-get install -y "$package" -qq; then
-            echo -e "	Failed to install: $package\n"
-            exit 1
-        fi
+        sudo apt-get update -y -qq && \
+        sudo apt-get install -y "$package" -qq
         echo -e "\n"
     else
         echo -e "	${package} is already installed.\n"
     fi
 }
 
+# Function to backup the existing HAProxy configuration
 function backup_config() {
     local config_file="/etc/haproxy/haproxy.cfg"
     local backup_file="haproxy_default.backup"
@@ -28,6 +27,7 @@ function backup_config() {
     fi
 }
 
+# Function to validate HAProxy configuration
 function validate_config() {
     echo -e "	Validating HAProxy configuration...\n"
     if sudo haproxy -c -f /etc/haproxy/haproxy.cfg; then
@@ -38,32 +38,29 @@ function validate_config() {
     fi
 }
 
+# Function to check if a port is in use
 function is_port_in_use() {
     local port=$1
     if sudo netstat -tuln | grep ":$port " > /dev/null; then
-        return 0
+        return 0  # Port is in use
     else
-        return 1
+        return 1  # Port is not in use
     fi
 }
 
-function check_server_availability() {
-    local server=$1
-    if ! curl -s --head --request GET "$server" | grep "200 OK" > /dev/null; then
-        echo -e "	Warning: $server is unreachable or not responding.\n"
-        exit 1
-    fi
-}
-
+# Function to configure HAProxy
 function configure_haproxy() {
     local config_file="/etc/haproxy/haproxy.cfg"
-    local port=8080  # Always use 8080 if port 80 is in use
+    local port=80
 
-    # Check if both web servers are accessible
-    check_server_availability "http://54.89.196.80"
-    check_server_availability "http://54.196.136.88"
+    # Check if port 80 is in use
+    if is_port_in_use "$port"; then
+        echo -e "	Port $port is already in use. Changing HAProxy bind port to 8080.\n"
+        port=8080
+    fi
 
-    local server_config="
+    local server_config=\
+"
 defaults
   mode http
   timeout client 15s
@@ -87,6 +84,7 @@ backend clickviral-tech-backend
     echo -e "	HAProxy configured with Roundrobin on web-01 & web-02 (Port: $port)\n"
 }
 
+# Function to start or restart HAProxy service
 function manage_haproxy_service() {
     if [ "$(pgrep -c haproxy)" -le 0 ]; then
         echo -e "	Starting HAProxy service...\n"
@@ -105,19 +103,34 @@ function manage_haproxy_service() {
     fi
 }
 
+# Main script execution
 echo -e "Updating and performing some minor checks...\n"
 
+# Install HAProxy if not already installed
 install haproxy
 
+# Backup the existing HAProxy configuration
 backup_config
 
+# Configure HAProxy
 configure_haproxy
 
+# Validate HAProxy configuration
 validate_config
 
+# Manage HAProxy service
 manage_haproxy_service
 
 echo -e "HAProxy setup completed successfully.\n"
 echo -e "Load balancing between:\n"
 echo -e "	web-01: 54.89.196.80\n"
-echo -e "	web-02: 54.196.136.88\n"
+echo -e "	web-02: 54.196.136.88\n"                               is there any improvement to be made ?     example of when i run the code : ubuntu@6410-lb-01:~$ curl -sI localhost
+HTTP/1.1 200 OK
+server: nginx/1.18.0 (Ubuntu)
+date: Mon, 10 Mar 2025 21:21:02 GMT
+content-type: text/html
+content-length: 13
+last-modified: Fri, 07 Mar 2025 22:30:28 GMT
+etag: "67cb7384-d"
+x-served-by: 6410-web-01
+accept-ranges: bytes
